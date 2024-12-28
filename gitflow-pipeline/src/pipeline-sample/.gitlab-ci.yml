@@ -1,0 +1,6 @@
+include: pipeline-sample/pipeline.yml
+
+variables:
+  SERVICE_NAME: service-todo
+  BUILD_DOCKER: ./server/Dockerfile ./server
+  TEST_DOCKER: ./server/Dockerfile.test ./server

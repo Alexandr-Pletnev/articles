@@ -1,0 +1,14 @@
+.script-build:
+  script:
+    - echo "MOCK .script-build  $SERVICE_NAME"
+
+.script-test:
+  script:
+    - echo "MOCK .script-test  $SERVICE_NAME"
+
+.script-deploy:
+  variables:
+    SERVICE_IMAGE: $IMAGE_LATEST
+    DC_FOLDER: ~/
+  script:
+    - echo "MOCK .script-deploy  $SERVICE_IMAGE into $DC_FOLDER"

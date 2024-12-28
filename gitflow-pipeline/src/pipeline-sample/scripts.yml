@@ -1,0 +1,51 @@
+variables:
+  # images names
+  IMAGE_COMMIT: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+  IMAGE_CACHE: $CI_REGISTRY_IMAGE:cache
+  IMAGE_LATEST: $CI_REGISTRY_IMAGE:latest
+  # service vars. Should be override in .gitlab-ci.yml
+  SERVICE_NAME: "TODO"
+  BUILD_DOCKER: Dockerfile .
+  TEST_DOCKER: Dockerfile.test .
+
+.script-build:
+  script:
+    - set -x
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - >
+      docker build --pull --cache-from "${IMAGE_CACHE}" -t "${IMAGE_COMMIT}" -t "${IMAGE_CACHE}"
+      --build-arg buildSha="${CI_COMMIT_SHORT_SHA}" --build-arg buildTimestamp=$(date '+%Y.%m.%d:%H.%M.%S') 
+      -f $BUILD_DOCKER
+    - docker push $IMAGE_COMMIT
+    - docker push $IMAGE_CACHE
+
+.script-test:
+  script:
+    - mkdir -p ./tests-results
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build --cache-from $IMAGE_CACHE -t $IMAGE_COMMIT-test -f $TEST_DOCKER
+    - export CONTAINER_NAME="$SERVICE_NAME-$CI_COMMIT_SHORT_SHA"
+    - docker stop $CONTAINER_NAME || true
+    - docker rm $CONTAINER_NAME || true
+    - docker run --name $CONTAINER_NAME $IMAGE_COMMIT-test
+    - docker cp  $CONTAINER_NAME:/tests-results/. ./tests-results || true
+    - docker rm $CONTAINER_NAME
+
+.script-deploy:
+  variables:
+    SERVICE_IMAGE: $IMAGE_LATEST
+    DC_FOLDER: ~/
+  script:
+    - chmod og= "$ID_RSA"
+    - apk update && apk add openssh-client
+    - |
+      ssh -p 33222 -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << END_TEXT
+        set -x;
+        set -e;
+        docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY;
+        cd $DC_FOLDER;
+        docker pull $IMAGE_COMMIT;
+        docker tag $IMAGE_COMMIT $SERVICE_IMAGE
+        docker-compose up -d --no-deps $SERVICE_NAME
+        set +x;
+      END_TEXT

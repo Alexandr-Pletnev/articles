@@ -1,0 +1,33 @@
+include:
+  - local: common/gitflow-pipeline-conditions.yml
+  - local: mr-only/scripts.yml
+
+variables:
+  # pipeline
+  FEATURE_KEYS: ""
+  BUGFIX_KEYS: ""
+  MR_KEYS: "|mr-rules-manual|"
+  DEVELOP_KEYS: ""
+  RELEASE_KEYS: ""
+  HOTFIX_KEYS: ""
+
+stages:
+  - approval
+
+.job-mr-rules:
+  stage: approval
+  extends:
+    - .script-common-mr-rules
+  variables:
+    REGEX_KEY_AUTO: /\|(mr-rules|mr-rules-auto)\|/i
+    REGEX_KEY_MANUAL: /\|mr-rules-manual\|/i
+
+mr:rules:manual:
+  extends:
+    - .start-manual
+    - .job-mr-rules
+
+mr:rules:auto:
+  extends:
+    - .start-auto
+    - .job-mr-rules

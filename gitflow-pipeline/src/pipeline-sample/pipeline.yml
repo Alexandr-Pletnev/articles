@@ -1,0 +1,84 @@
+include:
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+  - template: Security/License-Scanning.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+  - common/gitflow-pipeline-conditions.yml
+  - pipeline-sample/jobs.yml
+  - mr-only/scripts.yml
+  - pipeline-sample/scripts.yml
+
+variables:
+  # devops stuff
+  DOCKER_TLS_CERTDIR: ""
+  # pipeline
+  FEATURE_KEYS: "|build|test|deploy-d-manual|"
+  BUGFIX_KEYS: "|build|test-skip|deploy-d-manual|deploy-q-manual|"
+  MR_KEYS: "|build|test|mr-rules-manual|"
+  DEVELOP_KEYS: "|build|test|deploy-d|deploy-q|"
+  RELEASE_KEYS: "|build|test|deploy-d|deploy-q|deploy-p-manual|"
+  HOTFIX_KEYS: "|build|test-skip|deploy-d-manual|deploy-q-manual|deploy-p-manual|"
+
+stages:
+  - build
+  - debug
+  - test
+  - deploy-d
+  - approval
+  - deploy-q
+  - deploy-p
+
+build:manual:
+  extends:
+    - .start-manual
+    - .job-build
+
+build:auto:
+  extends:
+    - .start-auto
+    - .job-build
+
+test:manual:
+  extends:
+    - .start-manual
+    - .job-test
+
+test:auto:
+  extends:
+    - .start-auto
+    - .job-test
+
+deploy:dev:manual:
+  extends:
+    - .start-manual
+    - .job-deploy-dev
+
+deploy:dev:auto:
+  extends:
+    - .start-auto
+    - .job-deploy-dev
+
+deploy:qa:manual:
+  extends:
+    - .start-manual
+    - .job-deploy-qa
+
+deploy:qa:auto:
+  extends:
+    - .start-auto
+    - .job-deploy-qa
+
+deploy:prod:manual:
+  extends:
+    - .start-manual
+    - .job-deploy-prod
+
+mr:rules:manual:
+  extends:
+    - .start-manual
+    - .job-mr-rules
+
+mr:rules:auto:
+  extends:
+    - .start-auto
+    - .job-mr-rules
