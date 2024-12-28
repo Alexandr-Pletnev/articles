@@ -1,0 +1,28 @@
+.script-common-mr-rules:
+  script:
+    - apk update && apk add jq curl
+    - IS_ALLOWED_BRANCH=$(echo "${CI_COMMIT_REF_NAME}" | grep -iE '^(bugfix|feature|develop|hotfix|release).*$') || true
+    - >
+      if [[ -z "${IS_ALLOWED_BRANCH}" ]]; then 
+        echo "RULE FAILED: branch name is not allowed. Should be bugfix|feature|develop|hotfix|release"; 
+        exit 1; 
+      fi
+    - |
+      echo "RULE SUCCESS: branch name '$IS_ALLOWED_BRANCH' is allowed.";
+    - >
+      MR_AUTHOR=$(curl --header "Private-Token: ${MR_PRIVATE_TOKEN}" $CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID
+      | jq -r '.author.username')
+    - |
+      echo "MR_AUTHOR: $MR_AUTHOR"
+    - >
+      APPROVERS=$(curl --header "Private-Token: ${MR_PRIVATE_TOKEN}" $CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID/approvals 
+      | jq --arg author $MR_AUTHOR '.approved_by[] | select(any(. | .username != $author))')
+    - |
+      echo "FOUND APPROVERS: $APPROVERS"
+    - >
+      if [[ -z "${APPROVERS}" ]]; then 
+        echo "RULE FAILED: approval is required."; 
+        exit 1; 
+      fi
+    - |
+      echo "RULE SUCCESS: MR is approved.";

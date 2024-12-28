@@ -1,0 +1,98 @@
+.job-build:
+  stage: build
+  environment: dev
+  services:
+    - name: docker:dind
+      command:
+        - "--tls=false"
+  extends:
+    - .script-build
+  variables:
+    REGEX_KEY_AUTO: /\|(build|build-auto)\|/i
+    REGEX_KEY_MANUAL: /\|build-manual\|/i
+
+.job-test:
+  stage: test
+  environment: dev
+  services:
+    - name: docker:dind
+      command:
+        - "--tls=false"
+  extends:
+    - .script-test
+  variables:
+    REGEX_KEY_AUTO: '/\|(test|test-auto)\|/i'
+    REGEX_KEY_MANUAL: '/\|test-manual\|/i'
+
+.job-deploy-dbg:
+  stage: debug
+  environment: debug
+  allow_failure: true
+  services:
+    - name: docker:dind
+      command:
+        - "--tls=false"
+  extends:
+    - .script-deploy
+  variables:
+    REGEX_KEY_AUTO: /\|(deploy-dbg|deploy-dbg-auto)\|/i
+    REGEX_KEY_MANUAL: /\|deploy-dbg-manual\|/i
+    SERVICE_IMAGE: $SERVICE_NAME:debug
+    DC_FOLDER: /home/deployer/evrica/environments/debug
+
+.job-deploy-dev:
+  stage: deploy-d
+  environment: dev
+  services:
+    - name: docker:dind
+      command:
+        - "--tls=false"
+  extends:
+    - .script-deploy
+  variables:
+    REGEX_KEY_AUTO: /\|(deploy-d|deploy-d-auto)\|/i
+    REGEX_KEY_MANUAL: /\|deploy-d-manual\|/i
+    SERVICE_IMAGE: $SERVICE_NAME:dev
+    DC_FOLDER: /home/deployer/evrica/environments/dev
+
+.job-deploy-qa:
+  stage: deploy-q
+  environment: qa
+  services:
+    - name: docker:dind
+      command:
+        - "--tls=false"
+  extends:
+    - .script-deploy
+  variables:
+    REGEX_KEY_AUTO: /\|(deploy-q|deploy-q-auto)\|/i
+    REGEX_KEY_MANUAL: /\|deploy-q-manual\|/i
+    SERVICE_IMAGE: $SERVICE_NAME:qa
+    DC_FOLDER: /home/deployer/evrica/environments/qa
+
+.job-deploy-prod:
+  stage: deploy-p
+  environment: prod
+  services:
+    - name: docker:dind
+      command:
+        - "--tls=false"
+  extends:
+    - .script-deploy
+  variables:
+    REGEX_KEY_AUTO: /\|(deploy-p|deploy-p-auto)\|/i
+    REGEX_KEY_MANUAL: /\|deploy-p-manual\|/i
+    SERVICE_IMAGE: $SERVICE_NAME:prod
+    DC_FOLDER: /home/deployer/evrica/environments/prod
+
+.job-mr-rules:
+  stage: approval
+  services:
+    - name: docker:dind
+      command:
+        - "--tls=false"
+  extends:
+    - .script-common-mr-rules
+  variables:
+    REGEX_KEY_AUTO: /\|(mr-rules/mr-rules-auto)\|/i
+    REGEX_KEY_MANUAL: /\|mr-rules-manual\|/i

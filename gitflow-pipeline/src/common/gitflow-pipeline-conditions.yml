@@ -1,0 +1,40 @@
+#
+# conditions/rules for pipeline according to gitflow spec.
+#
+variables:
+  FEATURE_KEYS: "|build|test|deploy-d-manual|"
+  BUGFIX_KEYS: "|build|test-skip|deploy-d-manual|deploy-q-manual|"
+  MR_KEYS: "|build|test|mr-rules-manual|"
+  DEVELOP_KEYS: "|build|test|deploy-d|deploy-q|"
+  RELEASE_KEYS: "|build|test|deploy-d|deploy-q|deploy-p-manual|"
+  HOTFIX_KEYS: "|build|test-skip|deploy-d-manual|deploy-q-manual|deploy-p-manual|"
+
+.start-auto:
+  variables:
+    REGEX_KEY_AUTO: /\|(key-some|key-some-auto)\|/i
+  rules:
+    - if: $CI_COMMIT_REF_NAME =~ /^feature.*$/i && $CI_PIPELINE_SOURCE != "merge_request_event" && $FEATURE_KEYS =~ $REGEX_KEY_AUTO
+    - if: $CI_COMMIT_REF_NAME =~ /^bugfix.*$/i && $CI_PIPELINE_SOURCE != "merge_request_event" && $BUGFIX_KEYS =~ $REGEX_KEY_AUTO
+    - if: $CI_COMMIT_REF_NAME =~ /^develop.*$/i && $CI_PIPELINE_SOURCE != "merge_request_event" && $DEVELOP_KEYS =~ $REGEX_KEY_AUTO
+    - if: $CI_COMMIT_REF_NAME =~ /^release.*$/i && $CI_PIPELINE_SOURCE != "merge_request_event" && $RELEASE_KEYS =~ $REGEX_KEY_AUTO
+    - if: $CI_COMMIT_REF_NAME =~ /^hotfix.*$/i && $CI_PIPELINE_SOURCE != "merge_request_event" && $HOTFIX_KEYS =~ $REGEX_KEY_AUTO
+    - if: $CI_MERGE_REQUEST_ID && $MR_KEYS =~ $REGEX_KEY_AUTO
+    - when: never
+
+.start-manual:
+  variables:
+    REGEX_KEY_MANUAL: /\|key-some-manual\|/i
+  rules:
+    - if: $CI_COMMIT_REF_NAME =~ /^feature.*$/i && $CI_PIPELINE_SOURCE != "merge_request_event" && $FEATURE_KEYS =~ $REGEX_KEY_MANUAL
+      when: manual
+    - if: $CI_COMMIT_REF_NAME =~ /^bugfix.*$/i && $CI_PIPELINE_SOURCE != "merge_request_event" && $BUGFIX_KEYS =~ $REGEX_KEY_MANUAL
+      when: manual
+    - if: $CI_COMMIT_REF_NAME =~ /^develop.*$/i && $CI_PIPELINE_SOURCE != "merge_request_event" && $DEVELOP_KEYS =~ $REGEX_KEY_MANUAL
+      when: manual
+    - if: $CI_COMMIT_REF_NAME =~ /^release.*$/i && $CI_PIPELINE_SOURCE != "merge_request_event" && $RELEASE_KEYS =~ $REGEX_KEY_MANUAL
+      when: manual
+    - if: $CI_COMMIT_REF_NAME =~ /^hotfix.*$/i && $CI_PIPELINE_SOURCE != "merge_request_event" && $HOTFIX_KEYS =~ $REGEX_KEY_MANUAL
+      when: manual
+    - if: $CI_MERGE_REQUEST_ID && $MR_KEYS =~ $REGEX_KEY_MANUAL
+      when: manual
+    - when: never
