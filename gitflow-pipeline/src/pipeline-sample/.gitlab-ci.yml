@@ -1,6 +1,12 @@
+# this is sample of .gitlab-ci file.
+# you can copy this file into root of your service repo as start point. 
+
 include: pipeline-sample/pipeline.yml
 
 variables:
-  SERVICE_NAME: service-todo
-  BUILD_DOCKER: ./server/Dockerfile ./server
+  # set container name for docker (or service name for docker-compose).
+  SERVICE_NAME: todo-service-name 
+  # set path to dockerfile for building and docker context. see details in scripts.yaml.
+  BUILD_DOCKER: ./server/Dockerfile ./server  
+  # set path to dockerfile for testing and docker context. see details in scripts.yaml.
   TEST_DOCKER: ./server/Dockerfile.test ./server

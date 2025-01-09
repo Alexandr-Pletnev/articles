@@ -29,9 +29,9 @@ variables:
 
 где:
 
-- FEATURE_KEYS, BUGFIX_KEYS, MR_KEYS, ... - это **CONDITIONS** при которых pipeline запускается, в данном случае при  PUSH в соответствующую ветку согласно Gitflow (см. Conditions definition).
-- |build|test|deploy-d-manual| - это последовательность |KEY-1|KEY-2|KEY-N|  где за каждым  |KEY-X| закрепляются JOBs, которые будут запущены автоматически или вручную при запуске pipeline,  в данном случае при PUSH в соответствующую ветку. (см. Job definition).
-- имена |KEY-1|KEY-2|KEY-N| заданы согласно naming convention. (см. Keys naming convention).
+- FEATURE_KEYS, BUGFIX_KEYS, MR_KEYS, ... - это **CONDITIONS** при которых pipeline запускается, в данном случае при  PUSH в соответствующую ветку согласно Gitflow (см. [Conditions definition](#conditions-definition)).
+- |build|test|deploy-d-manual| - это последовательность |KEY-1|KEY-2|KEY-N|  где за каждым  |KEY-X| закрепляются JOBs, которые будут запущены автоматически или вручную при запуске pipeline,  в данном случае при PUSH в соответствующую ветку. (см. [Job definition](#jobs-definition)).
+- имена |KEY-1|KEY-2|KEY-N| заданы согласно naming convention. (см. [Keys naming convention](#keys-naming-convention)).
 
 ## Пример ##
 
@@ -133,9 +133,9 @@ variables:
   - каждая из групп  .start-auto: or .start-manual: определяет несколько "- if:" для каждого CONDITION с указанием режима запуска [WHEN](https://docs.gitlab.com/ee/ci/yaml/#when).
   - далее эти условия запуска применяются к конкретному JOB с помощью инструкции  ["extends:"](https://docs.gitlab.com/ee/ci/yaml/#extends )
 - Каждый IF определяет expression который можно трактовать как "если запушили коммит в ветку {BRANCH-NAME} и переменная ${BRANCH-NAME}_KEYS соответствует regex (содержит |KEY|), то вернуть true ", при этом regex задается через переменные уровня JOB $REGEX_KEY_MANUAL и $REGEX_KEY_AUTO .
-- в свою очередь переменные $REGEX_KEY_MANUAL и $REGEX_KEY_AUTO должны быть переопределены в конкретном JOB и содержать regex который и определяет за каким |KEY| данный JOB закрепляется.  (подробнее см. JOBs definition).
+- в свою очередь переменные $REGEX_KEY_MANUAL и $REGEX_KEY_AUTO должны быть переопределены в конкретном JOB и содержать regex который и определяет за каким |KEY| данный JOB закрепляется.  (подробнее см. [JOBs definition](#jobs-definition)).
 
-> Необходимо понимать что файл gitflow-pipeline-conditions.yml является общим для всех других Gitflow pipeline и определяет только какие CONDITIONS есть и условия их запуска, а не сам pipeline. Сам pipeline декларируется в отдельном файле и должен переопределить все переменные СONDITIONS.  подробнее смотрите в pipeline definition.
+> Необходимо понимать что файл gitflow-pipeline-conditions.yml является общим для всех других Gitflow pipeline и определяет только какие CONDITIONS есть и условия их запуска, а не сам pipeline. Сам pipeline декларируется в отдельном файле и должен переопределить все переменные СONDITIONS.  подробнее смотрите в [pipeline definition](#pipeline-definition).
 
 ## JOBs definition ##
 
@@ -208,12 +208,12 @@ Naming convention для текущих примеров:
 
 ## Pipeline definition ##
 
-Файл gitflow-pipeline-conditions.yml является общим для всех других Gitflow pipeline и определяет только какие CONDITIONS есть и условия их запуска, а не сам pipeline. Сам pipeline декларируется в отдельном файле и должен переопределить все переменные СONDITIONS (подробнее смотрите Conditions definition).  
+Файл [gitflow-pipeline-conditions.yml](src/common/gitflow-pipeline-conditions.yml) является общим для всех других Gitflow pipeline и определяет только какие CONDITIONS есть и условия их запуска, а не сам pipeline. Сам pipeline декларируется в отдельном файле и должен переопределить все переменные СONDITIONS (подробнее смотрите [Conditions definition](#conditions-definition)).  
 
 Примеры pipelines на базе Gitflow pipeline conditions:
 
-- [MR-Only](./src/mr-only/pipeline.yml) - pipeline только для Merge requests. Выполняет проверки: на корректное имя ветки ветки и что автор комита не имеет права мержить.
-- [Multi-Stage](./src/pipeline-sample/pipeline.yml) - пример организации pipeline для Dev, QA, Prod сред. Build docker images and deploy to Docker-compose.
+- [MR-Only](./src/mr-only/pipeline.yml) - pipeline только для Merge requests. Выполняет проверки: на корректное имя ветки и что автор комита не имеет права мержить.
+- [Multi-Stage](./src/pipeline-sample/pipeline.yml) - пример организации pipeline для Dev, QA, Prod сред. Build docker images and deploy to docker-compose on remote host.
 
 > Обратите внимание на организацию артефактов pipeline по файлам: pipeline.yml, jobs.yml, scripts.yml - свое рода это тоже conventions.
 
@@ -223,8 +223,8 @@ Naming convention для текущих примеров:
 
 ```yaml
   FEATURE_KEYS: >
-    deploy-d: |deploy-d-manual|restart-d-manual|
-    deploy-q: |deploy-q-manual|restart-q-manual|
+    deploy-d: |deploy-d-manual|restart-d-manual| # some description ...
+    deploy-q: |deploy-q-manual| also you can |restart-q-manual|
   BUGFIX_KEYS: $FEATURE_KEYS
   MR_KEYS: "|mr-rules-manual|"
   DEVELOP_KEYS: "|deploy-d-auto|deploy-q-auto|restart-d-manual|restart-q-manual|"
@@ -235,10 +235,10 @@ Naming convention для текущих примеров:
   HOTFIX_KEYS: $RELEASE_KEYS
   ```
 
-  Главное соблюдать правило: *имена |KEY| обязательно должны экранироваться символом "|" с обеих сторон*
+  Главное придерживаться правила: *имена |KEY| обязательно должны экранироваться символом "|" с обеих сторон*
 
 ## Conclusion ##
 
-В свое время передо мной стоял задача по реализации CI/CD pipeline. Изучив имеющиеся под рукой и в интернете реализации и почерпнув от туда удачные идеи я разработал описанный здесь подход.
+В свое время передо мной стояла задача по реализации CI/CD pipeline. Изучив имеющиеся под рукой и в интернете реализации и почерпнув от туда удачные идеи я разработал описанный здесь подход.
 
 Надеюсь что описанный здесь Gitflow pipeline окажется полезным и станет ценным источником вдохновения для других.

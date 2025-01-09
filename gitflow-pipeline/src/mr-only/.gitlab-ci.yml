@@ -1,1 +1,4 @@
+# this is sample of .gitlab-ci file.
+# you can copy this file into root of your service repo as start point. 
+
 include: mr-only/pipeline.yml

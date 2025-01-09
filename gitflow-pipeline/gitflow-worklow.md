@@ -1,3 +1,5 @@
+# Gitflow workflow in short #
+
 According to [Gitflow workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow) a developer works with the next branches only:
 
 - master or main
@@ -7,7 +9,7 @@ According to [Gitflow workflow](https://www.atlassian.com/git/tutorials/comparin
 - release/*
 - hotfix/*
 
-Gitflow Workflow
+Gitflow Workflow:
 
 - **develop** branch is created from **master**
 - **release** branches are created from **develop**

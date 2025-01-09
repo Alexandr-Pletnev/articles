@@ -21,7 +21,6 @@ variables:
 
 stages:
   - build
-  - debug
   - test
   - deploy-d
   - approval
