@@ -6,7 +6,7 @@
 
 - реализация под [Gitlab CI/CD pipeline](https://docs.gitlab.com/ee/ci/pipelines/).
 - процесс разработки проходит по правилам  [Gitflow workflow](./gitflow-worklow.md)
-- необходимость выполнения действий в несколько этапов и для нескольких сред: DEV, QA, STAGE, PROD.
+- необходимость выполнения действий в несколько этапов и для нескольких сред: DEV, QA, PROD. (где QA - quality assurance, название environment для среды для TEST).
 - возможность определения режима запуска JOBs: автоматически или в ручную.
 
 Описываемый далее CI/CD pipeline был специально спроектирован для Gitflow workflow поэтому был назван **Gitflow pipeline**.
@@ -195,8 +195,7 @@ Naming convention для текущих примеров:
 - \*-manual  - launch JOB manually.
 - \*-skip - skip JOB.
 - \*-d-\* - to deploy on DEV environment.
-- \*-q-\* - to deploy on QA environment.
-- \*-s-\* - to deploy on STAGE environment.
+- \*-q-\* - to deploy on QA (TEST) environment.
 - \*-p-\* - to deploy on PROD environment.
 
 Вы можете согласовать свой naming convention и придерживаться его, например условиться что
