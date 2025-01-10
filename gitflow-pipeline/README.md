@@ -189,14 +189,12 @@ build:auto:
 
 ## Pipeline definition ##
 
-Файл [gitflow-pipeline-conditions.yml](src/common/gitflow-pipeline-conditions.yml) является общим для всех других Gitflow pipeline и определяет только какие CONDITIONS есть и условия их запуска, а не сам pipeline. Сам pipeline декларируется в отдельном файле и должен переопределить все переменные СONDITIONS (подробнее смотрите [Conditions definition](#conditions-definition)).  
+Файл [gitflow-pipeline-conditions.yml](src/common/gitflow-pipeline-conditions.yml) является общим для всех других Gitflow pipeline и определяет только какие CONDITIONS есть и условия их запуска, а не сам pipeline. Сам pipeline декларируется в отдельном файле (и папке)  и должен переопределить все переменные СONDITIONS (подробнее смотрите [Conditions definition](#conditions-definition)).  
 
 Примеры pipelines на базе Gitflow pipeline conditions:
 
 - [MR-Only](./src/mr-only/pipeline.yml) - пример pipeline только для Merge requests. В данном примере pipeline стартует только при создании Merge Request. (пример также содержит [bash script](./src/mr-only/scripts.yml) который выполняет ряд проверок: на корректное имя ветки и что автор комита не является рецензентом (reviewer)).
 - [Multi-Envs](./src/pipeline-sample/pipeline.yml) - пример организации pipeline для Dev, QA, Prod сред. (а также примеры [bash scripts](./src/pipeline-sample/scripts.yml) с помощью которых выполняется 'Build docker images and deploy to docker-compose on remote host').
-
-> Обратите внимание на организацию артефактов pipeline по файлам: pipeline.yml, jobs.yml, scripts.yml - свое рода это тоже conventions.
 
 Для наглядности представления pipeline можно использовать возможности multiline string языка YAML (смотрите примеры по ссылке: <https://stackoverflow.com/a/21699210>).
 
@@ -246,6 +244,8 @@ Naming convention для текущих примеров:
 ### Pipeline artifacts arrangement ###
 
 todo:
+
+> Обратите внимание на организацию артефактов pipeline по файлам: pipeline.yml, jobs.yml, scripts.yml - свое рода это тоже conventions.
 
 ## Conclusion ##
 
