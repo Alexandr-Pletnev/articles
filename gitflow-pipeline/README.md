@@ -218,7 +218,11 @@ build:auto:
 
   Главное придерживаться правила: *имена |KEY| обязательно должны экранироваться символом "|" с обеих сторон*
   
-## Keys naming convention ##
+## Pipeline`s conventions ##
+
+todo: introduce water.
+
+### Keys naming convention ###
 
 Naming convention для текущих примеров:
 
@@ -238,6 +242,10 @@ Naming convention для текущих примеров:
 
 - если режим запуска по умолчанию д.б. **автоматический** укажите для  `REGEX_KEY_AUTO: /\|({build|build-auto)\|/i` и для `REGEX_KEY_MANUAL: /\|build-manual\|/i`
 - если режим запуска по умолчанию д.б. **ручной** укажите для  `REGEX_KEY_MANUAL: /\|(build|build-manual)\|/i` и для `REGEX_KEY_AUTO: /\|build-auto\|/i`.
+
+### Pipeline artifacts arrangement ###
+
+todo:
 
 ## Conclusion ##
 
