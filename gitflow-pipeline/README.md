@@ -33,7 +33,7 @@ variables:
 - |build|test|deploy-d-manual| - это последовательность |KEY-1|KEY-2|KEY-N|  где за каждым  |KEY-X| закрепляются JOBs, которые будут запущены автоматически или вручную при запуске pipeline,  в данном случае при PUSH в соответствующую ветку. (см. [Job definition](#jobs-definition)).
 - имена |KEY-1|KEY-2|KEY-N| заданы согласно naming convention. (см. [Keys naming convention](#keys-naming-convention)).
 
-## Sample ##
+## Example ##
 
 Разберем пример: ```FEATURE_KEYS: "|build|test|deploy-d-manual|"``` - при PUSH в ветку "feature/*", автоматически запуститься pipeline и JOB закрепленный за key |build| и при успешном завершении job |build| далее автоматически запуститься job закрепленный за key |test|, далее при успешном завершении job |test|, активируется job закрепленный за key |deploy-d-manual|, но будет ожидать ручного запуска.
 
@@ -174,7 +174,7 @@ build:auto:
 Некоторые ключевые моменты:
 
 - JOB определяем как [hidden(Start the job name with a dot (.))](https://docs.gitlab.com/ee/ci/jobs/#hide-jobs).
-- имена |KEY| произвольные и задаются по своему усмотрению, но желательно что бы соответствовали определенному naming convention.
+- имена |KEY| произвольные и задаются по своему усмотрению, но желательно что бы соответствовали определенному [naming convention](#keys-naming-convention).
 - имена |KEY| обязательно должны экранироваться символом "|"  с обеих сторон. такой подход позволяет использовать даже комментарии в описание pipeline.
   - "deploy-q|" or  "|deploy-q" or "deploy-q" - incorrect.
   - "|deploy-q|" - correct.
@@ -186,27 +186,6 @@ build:auto:
 - за одним |KEY| можно закрепить несколько JOB. они будут стартовать параллельно.
 
 <ins>На втором шаге определяем два VISIBLE JOBs.</ins>  Задаем им имена, т.к. они будут видны в UI (e.g. build:manual или build:auto). И с помощью инструкции  ["extends:"](https://docs.gitlab.com/ee/ci/yaml/#extends )  указываем какие hidden job переиспользовать. в нашем случае это режим запуска .start-manual или .start-auto и какой JOB это .job-build.
-
-## Keys naming convention ##
-
-Naming convention для текущих примеров:
-
-- \*-auto или без -suffix - запуск JOB автоматически. по умолчанию*.
-- \*-manual  - запуск JOB вручную.
-- \*-skip - пропустить JOB (не выполнять).
-- \*-d-\* - действия на DEV environment, например deploy/restart/clean/so on.
-- \*-q-\* - действия на  QA (TEST) environment, например deploy.
-- \*-p-\* - действия на  PROD environment, например deploy.
-
-Вы можете согласовать свой naming convention и придерживаться его, например условиться что
-
-- \*-manual или без -suffix  - запуск JOB вручную. по умолчанию*.
-- \*-auto - запуск JOB автоматически. т.е. для автоматического запуска JOB надо явно указывать suffix "-auto".
-
- *по умолчанию - режим запуска по умолчанию, т.е. какой режим назначить для |KEY| без suffix, например для KEY |build|:
-
-- если режим запуска по умолчанию д.б. **автоматический** укажите для  `REGEX_KEY_AUTO: /\|({build|build-auto)\|/i` и для `REGEX_KEY_MANUAL: /\|build-manual\|/i`
-- если режим запуска по умолчанию д.б. **ручной** укажите для  `REGEX_KEY_MANUAL: /\|(build|build-manual)\|/i` и для `REGEX_KEY_AUTO: /\|build-auto\|/i`.
 
 ## Pipeline definition ##
 
@@ -238,6 +217,27 @@ Naming convention для текущих примеров:
   ```
 
   Главное придерживаться правила: *имена |KEY| обязательно должны экранироваться символом "|" с обеих сторон*
+  
+## Keys naming convention ##
+
+Naming convention для текущих примеров:
+
+- \*-auto или без -suffix - запуск JOB автоматически. по умолчанию*.
+- \*-manual  - запуск JOB вручную.
+- \*-skip - пропустить JOB (не выполнять).
+- \*-d-\* - действия на DEV environment, например deploy/restart/clean/so on.
+- \*-q-\* - действия на  QA (TEST) environment, например deploy.
+- \*-p-\* - действия на  PROD environment, например deploy.
+
+Вы можете согласовать свой naming convention и придерживаться его, например условиться что
+
+- \*-manual или без -suffix  - запуск JOB вручную. по умолчанию*.
+- \*-auto - запуск JOB автоматически. т.е. для автоматического запуска JOB надо явно указывать suffix "-auto".
+
+ *по умолчанию - режим запуска по умолчанию, т.е. какой режим назначить для |KEY| без suffix, например для KEY |build|:
+
+- если режим запуска по умолчанию д.б. **автоматический** укажите для  `REGEX_KEY_AUTO: /\|({build|build-auto)\|/i` и для `REGEX_KEY_MANUAL: /\|build-manual\|/i`
+- если режим запуска по умолчанию д.б. **ручной** укажите для  `REGEX_KEY_MANUAL: /\|(build|build-manual)\|/i` и для `REGEX_KEY_AUTO: /\|build-auto\|/i`.
 
 ## Conclusion ##
 
