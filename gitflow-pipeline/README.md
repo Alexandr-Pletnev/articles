@@ -214,8 +214,8 @@ Naming convention для текущих примеров:
 
 Примеры pipelines на базе Gitflow pipeline conditions:
 
-- [MR-Only](./src/mr-only/pipeline.yml) - pipeline только для Merge requests. Выполняет проверки: на корректное имя ветки и что автор комита не имеет права мержить.
-- [Multi-Stage](./src/pipeline-sample/pipeline.yml) - пример организации pipeline для Dev, QA, Prod сред. Build docker images and deploy to docker-compose on remote host.
+- [MR-Only](./src/mr-only/pipeline.yml) - пример pipeline только для Merge requests. В данном примере pipeline стартует только при создании Merge Request. (пример также содержит [bash script](./src/mr-only/scripts.yml) который выполняет ряд проверок: на корректное имя ветки и что автор комита не является рецензентом (reviewer)).
+- [Multi-Envs](./src/pipeline-sample/pipeline.yml) - пример организации pipeline для Dev, QA, Prod сред. (а также примеры [bash scripts](./src/pipeline-sample/scripts.yml) с помощью которых выполняется 'Build docker images and deploy to docker-compose on remote host').
 
 > Обратите внимание на организацию артефактов pipeline по файлам: pipeline.yml, jobs.yml, scripts.yml - свое рода это тоже conventions.
 
