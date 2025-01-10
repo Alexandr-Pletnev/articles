@@ -201,14 +201,12 @@ Naming convention для текущих примеров:
 Вы можете согласовать свой naming convention и придерживаться его, например условиться что
 
 - \*-manual или без -suffix  - запуск JOB вручную. по умолчанию*.
-- \*-auto - запуск JOB автоматически.
-- \*-test-\* или \*-t-\*  - действия на TEST environment.
-- \*-s-\*  - действия на STAGE (pre-prod) environment.
+- \*-auto - запуск JOB автоматически. т.е. для автоматического запуска JOB надо явно указывать suffix "-auto".
 
- *по умолчанию - режим запуска по умолчанию, т.е. какой режим назначить для |KEY| без suffix, например:
+ *по умолчанию - режим запуска по умолчанию, т.е. какой режим назначить для |KEY| без suffix, например для KEY |build|:
 
-- если `REGEX_KEY_AUTO: /\|(build|build-auto)\|/i` т.е. для автоматического запуска JOB |build| == |build-auto| - режим запуска по умолчанию будет автоматический.
-- если `REGEX_KEY_MANUAL: /\|(build|build-manual)\|/i` т.е. для ручного запуска JOB |build| == |build-manual| - режим запуска по умолчанию будет вручную.
+- если режим запуска по умолчанию д.б. **автоматический** укажите для  `REGEX_KEY_AUTO: /\|({build|build-auto)\|/i` и для `REGEX_KEY_MANUAL: /\|build-manual\|/i`
+- если режим запуска по умолчанию д.б. **ручной** укажите для  `REGEX_KEY_MANUAL: /\|(build|build-manual)\|/i` и для `REGEX_KEY_AUTO: /\|build-auto\|/i`.
 
 ## Pipeline definition ##
 
