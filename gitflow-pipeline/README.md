@@ -6,8 +6,8 @@
 
 - реализация под [Gitlab CI/CD pipeline](https://docs.gitlab.com/ee/ci/pipelines/).
 - процесс разработки проходит по правилам  [Gitflow workflow](./gitflow-worklow.md)
-- необходимость выполнения действий в несколько этапов и для нескольких сред: DEV, QA, PROD. (где QA - quality assurance, название environment для среды для TEST).
-- возможность определения режима запуска JOBs: автоматически или в ручную.
+- необходимость выполнения действий в несколько этапов и для нескольких сред: DEV, QA or TEST, PROD.
+- возможность указания режима запуска JOBs в pipeline: автоматически или вручную.
 
 Описываемый далее CI/CD pipeline был специально спроектирован для Gitflow workflow поэтому был назван **Gitflow pipeline**.
 
@@ -33,9 +33,9 @@ variables:
 - |build|test|deploy-d-manual| - это последовательность |KEY-1|KEY-2|KEY-N|  где за каждым  |KEY-X| закрепляются JOBs, которые будут запущены автоматически или вручную при запуске pipeline,  в данном случае при PUSH в соответствующую ветку. (см. [Job definition](#jobs-definition)).
 - имена |KEY-1|KEY-2|KEY-N| заданы согласно naming convention. (см. [Keys naming convention](#keys-naming-convention)).
 
-## Пример ##
+## Sample ##
 
-Разберем пример: ```FEATURE_KEYS: "|build|test|deploy-d-manual|"``` - при PUSH в ветку "feature/*", автоматически запуститься JOB закрепленный за key |build| и при успешном завершении job |build| далее автоматически запуститься job закрепленный за key |test|, далее при успешном завершении job |test|, активируется job закрепленный за key |deploy-d-manual|, но будет ожидать ручного запуска.
+Разберем пример: ```FEATURE_KEYS: "|build|test|deploy-d-manual|"``` - при PUSH в ветку "feature/*", автоматически запуститься pipeline и JOB закрепленный за key |build| и при успешном завершении job |build| далее автоматически запуститься job закрепленный за key |test|, далее при успешном завершении job |test|, активируется job закрепленный за key |deploy-d-manual|, но будет ожидать ручного запуска.
 
 JOBs  в общем виде задаются как (пример для |build|):
 
@@ -183,27 +183,32 @@ build:auto:
 - regex указываем в двух переменных. по сути мы переопределяем  значения этих переменных заданных в  gitflow-pipeline-conditions.yml.
   - REGEX_KEY_AUTO - для автоматического запуска JOB.
   - REGEX_KEY_MANUAL - для запуска JOB руками.
-- за одним |KEY| можно закрепить несколько JOB. они будут стартовать ||.
+- за одним |KEY| можно закрепить несколько JOB. они будут стартовать параллельно.
 
-<ins>На втором шаге определяем два VISIBLE JOBs.</ins>  Задаем им имена, т.к. они будут видны в UI (e.g. build:manual или build:auto). И с помощью инструкции  ["extends:"](https://docs.gitlab.com/ee/ci/yaml/#extends )  указываем какие hidden job переиспользовать. в нашем случае это режим запуска  .start-manual или .start-auto и какой JOB это .job-build.
+<ins>На втором шаге определяем два VISIBLE JOBs.</ins>  Задаем им имена, т.к. они будут видны в UI (e.g. build:manual или build:auto). И с помощью инструкции  ["extends:"](https://docs.gitlab.com/ee/ci/yaml/#extends )  указываем какие hidden job переиспользовать. в нашем случае это режим запуска .start-manual или .start-auto и какой JOB это .job-build.
 
 ## Keys naming convention ##
 
 Naming convention для текущих примеров:
 
-- \*-auto or w/o suffix - launch JOB automatically. by default.
-- \*-manual  - launch JOB manually.
-- \*-skip - skip JOB.
-- \*-d-\* - to deploy on DEV environment.
-- \*-q-\* - to deploy on QA (TEST) environment.
-- \*-p-\* - to deploy on PROD environment.
+- \*-auto или без -suffix - запуск JOB автоматически. по умолчанию*.
+- \*-manual  - запуск JOB вручную.
+- \*-skip - пропустить JOB (не выполнять).
+- \*-d-\* - действия на DEV environment, например deploy/restart/clean/so on.
+- \*-q-\* - действия на  QA (TEST) environment, например deploy.
+- \*-p-\* - действия на  PROD environment, например deploy.
 
 Вы можете согласовать свой naming convention и придерживаться его, например условиться что
 
-- \*-manual or w/o suffix  - launch JOB manually. by default.
-- \*-auto - launch JOB automatically.
+- \*-manual или без -suffix  - запуск JOB вручную. по умолчанию*.
+- \*-auto - запуск JOB автоматически.
+- \*-test-\* или \*-t-\*  - действия на TEST environment.
+- \*-s-\*  - действия на STAGE (pre-prod) environment.
 
- т.е. по умолчанию ручной запуск  e.g. |build| == |build-manual|, а для автоматического запуска надо всегда указывать postfix "-auto".
+ *по умолчанию - режим запуска по умолчанию, т.е.какой режим для |KEY| без suffix, например:
+
+- если |build| == |build-auto| - режим запуска по умолчанию будет автоматический.
+- если |build| == |build-manual| - режим запуска по умолчанию будет вручную.
 
 ## Pipeline definition ##
 
