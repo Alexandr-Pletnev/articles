@@ -131,8 +131,8 @@ variables:
   - при этом, переменные CONDITIONs  должны быть переопределены в файле соответствующего pipeline с указанием  |KEY-1|KEY-2|KEY-N|.
 - .start-auto: and .start-manual: - объявлены как HIDDEN JOB и содержат только условия запуска pipeline, которые задаются с помощью инструкции [RULES](https://docs.gitlab.com/ee/ci/jobs/job_rules.html).
   - каждая из групп  .start-auto: or .start-manual: определяет несколько "- if:" для каждого CONDITION с указанием режима запуска [WHEN](https://docs.gitlab.com/ee/ci/yaml/#when).
-  - далее эти условия запуска применяются к конкретному JOB с помощью инструкции  ["extends:"](https://docs.gitlab.com/ee/ci/yaml/#extends )
-- Каждый IF определяет expression который можно трактовать как "если запушили коммит в ветку {BRANCH-NAME} и переменная ${BRANCH-NAME}_KEYS соответствует regex (содержит |KEY|), то вернуть true ", при этом regex задается через переменные уровня JOB $REGEX_KEY_MANUAL и $REGEX_KEY_AUTO .
+  - в последствии эти условия запуска применяются к конкретному JOB с помощью инструкции  ["extends:"](https://docs.gitlab.com/ee/ci/yaml/#extends )
+- Каждый IF определяет expression который можно трактовать как "если запушили коммит в ветку {BRANCH-NAME} и переменная ${BRANCH-NAME}_KEYS соответствует regex (содержит |KEY|), то вернуть true ", при этом regex задается через переменные уровня JOB: $REGEX_KEY_MANUAL и $REGEX_KEY_AUTO .
 - в свою очередь переменные $REGEX_KEY_MANUAL и $REGEX_KEY_AUTO должны быть переопределены в конкретном JOB и содержать regex который и определяет за каким |KEY| данный JOB закрепляется.  (подробнее см. [JOBs definition](#jobs-definition)).
 
 > Необходимо понимать что файл gitflow-pipeline-conditions.yml является общим для всех других Gitflow pipeline и определяет только какие CONDITIONS есть и условия их запуска, а не сам pipeline. Сам pipeline декларируется в отдельном файле и должен переопределить все переменные СONDITIONS.  подробнее смотрите в [pipeline definition](#pipeline-definition).
@@ -141,7 +141,7 @@ variables:
 
 JOBs  в общем виде задаются как (пример для |build|):
 
-1. Определяем HIDDEN JOB  и закрепляем JOB за KEYs: |build| или |build-auto| или |build-manual|
+1. Определяем HIDDEN JOB  и закрепляем JOB за KEYs: |build| или |build-auto| или |build-manual|, а также указываем [stage](https://docs.gitlab.com/ee/ci/yaml/#stage)*.
 
 ```yaml
 .job-build:
@@ -152,6 +152,8 @@ JOBs  в общем виде задаются как (пример для |build
     REGEX_KEY_AUTO: /\|(build|build-auto)\|/i
     REGEX_KEY_MANUAL: /\|build-manual\|/i
 ```
+
+> *stage - в самом pipeline с помощью [stages:](https://docs.gitlab.com/ee/ci/yaml/#stages) задается последовательность выполнения JOB в рамках pipeline в определенном порядке.
 
 2. Далее определяем два VISIBLE JOBs для ручного и автоматического запуска как:
 
@@ -173,7 +175,7 @@ build:auto:
 
 Некоторые ключевые моменты:
 
-- JOB определяем как [hidden(Start the job name with a dot (.))](https://docs.gitlab.com/ee/ci/jobs/#hide-jobs).
+- JOB определяем как [HIDDEN JOBs (Start the job name with a dot (.))](https://docs.gitlab.com/ee/ci/jobs/#hide-jobs).
 - имена |KEY| произвольные и задаются по своему усмотрению, но желательно что бы соответствовали определенному [naming convention](#keys-naming-convention).
 - имена |KEY| обязательно должны экранироваться символом "|"  с обеих сторон. такой подход позволяет использовать даже комментарии в описание pipeline.
   - "deploy-q|" or  "|deploy-q" or "deploy-q" - incorrect.
@@ -186,6 +188,8 @@ build:auto:
 - за одним |KEY| можно закрепить несколько JOB. они будут стартовать параллельно.
 
 <ins>На втором шаге определяем два VISIBLE JOBs.</ins>  Задаем им имена, т.к. они будут видны в UI (e.g. build:manual или build:auto). И с помощью инструкции  ["extends:"](https://docs.gitlab.com/ee/ci/yaml/#extends )  указываем какие hidden job переиспользовать. в нашем случае это режим запуска .start-manual или .start-auto и какой JOB это .job-build.
+
+> Согласно todo:conventions HIDDEN JOBs определяются в файле  jobs.yml, a VISIBLE JOBs в файле pipeline.yml.
 
 ## Pipeline definition ##
 
