@@ -189,7 +189,19 @@ build:auto:
 
 ## Pipeline definition ##
 
-Файл [gitflow-pipeline-conditions.yml](src/common/gitflow-pipeline-conditions.yml) является общим для всех других Gitflow pipeline и определяет только какие CONDITIONS есть и условия их запуска, а не сам pipeline. Сам pipeline декларируется в отдельном файле (и папке)  и должен переопределить все переменные СONDITIONS (подробнее смотрите [Conditions definition](#conditions-definition)).  
+Файл [gitflow-pipeline-conditions.yml](src/common/gitflow-pipeline-conditions.yml) является общим для всех других Gitflow pipeline и определяет только какие CONDITIONS есть и условия их запуска, а не сам pipeline. Сам pipeline декларируется в отдельном файле (и папке)  и должен переопределить все переменные CONDITIONS (подробнее смотрите [Conditions definition](#conditions-definition)).  
+
+В самом pipeline необходимо указать, как минимум, следующие настройки:
+
+1. Подключить [gitflow-pipeline-conditions.yml](src/common/gitflow-pipeline-conditions.yml) как `include: {path-to-folder}/gitflow-pipeline-conditions.yml` (где файл gitflow-pipeline-conditions.yml будет находиться вам решать).
+2. Собственно описать/задать сам pipeline, а конкретно  переопределить все переменные CONDITIONS, и указать нужную последовательность |KEY-1|KEY-2|KEY-N| для каждого CONDITION.
+3. Определить `stages:` для pipeline (см. <https://docs.gitlab.com/ee/ci/yaml/#stages>).
+4. Определить VISIBLE JOBs, по паре AUTO and MANUAL, указав им:
+    1. имена, которые желаете видеть в UI.
+    2. к какой stage данный JOB относиться.
+    3. режим запуска `.start-auto` или `.start-manual`
+    4. какой `.job-hidden` использовать. (определение самих hidden jobs, где и как, на ваше усмотрение, можно в этом же файле, а можно и в отдельном).
+    5. другие параметры JOB по вашему усмотрению.
 
 Примеры pipelines на базе Gitflow pipeline conditions:
 
