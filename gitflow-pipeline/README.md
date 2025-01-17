@@ -259,16 +259,18 @@ Naming convention для текущих примеров:
 - если режим запуска по умолчанию д.б. **автоматический** укажите для  `REGEX_KEY_AUTO: /\|({build|build-auto)\|/i` и для `REGEX_KEY_MANUAL: /\|build-manual\|/i`
 - если режим запуска по умолчанию д.б. **ручной** укажите для  `REGEX_KEY_MANUAL: /\|(build|build-manual)\|/i` и для `REGEX_KEY_AUTO: /\|build-auto\|/i`.
 
-### Pipeline files arrangement ###
-
-Все имена variables в pipeline yaml и bash scripts д.б. в SCREAM_CASE, пример: FEATURE_KEYS, REGEX_KEY_AUTO
+### Pipeline's files arrangement ###
 
 - Pipeline состоит из набора файлов, который храниться в [отдельной папке](./src/pipeline-sample/). Название папки отражает название pipeline.
-- pipeline.yml - файл содержит [pipeline definition](#pipeline-definition).
-- jobs.yml - файл содержит HIDDEN JOBs. см. [JOBs definition](#jobs-definition)
-  - имя hidden job д.б. в kebab-case и начинаться с prefix .job-*
+- pipeline.yml - файл содержит [pipeline definition](#pipeline-definition) в том числе VISIBLE JOBs.
+- jobs.yml - файл содержит HIDDEN JOBs. см. [JOBs definition](#jobs-definition).
+  - имя hidden job д.б. в kebab-case и начинаться с prefix ".job-*"
 - scripts.yml - файл содержит скрипты автоматизации.
-  - все скрипты задаются как hidden job и имя д.б. в kebab-case и начинаться с prefix .script-*
+  - все скрипты задаются как hidden job и имя д.б. в kebab-case и начинаться с prefix ".script-*"
+
+  ### Variables naming conventions ###
+  
+  Все имена variables в pipeline yaml и bash scripts д.б. в SCREAM_CASE, пример: FEATURE_KEYS, REGEX_KEY_AUTO.
 
 ## Conclusion ##
 
