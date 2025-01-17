@@ -259,11 +259,16 @@ Naming convention для текущих примеров:
 - если режим запуска по умолчанию д.б. **автоматический** укажите для  `REGEX_KEY_AUTO: /\|({build|build-auto)\|/i` и для `REGEX_KEY_MANUAL: /\|build-manual\|/i`
 - если режим запуска по умолчанию д.б. **ручной** укажите для  `REGEX_KEY_MANUAL: /\|(build|build-manual)\|/i` и для `REGEX_KEY_AUTO: /\|build-auto\|/i`.
 
-### Pipeline artifacts arrangement ###
+### Pipeline files arrangement ###
 
-todo:
+Все имена variables в pipeline yaml и bash scripts д.б. в SCREAM_CASE, пример: FEATURE_KEYS, REGEX_KEY_AUTO
 
-> Обратите внимание на организацию артефактов pipeline по файлам: pipeline.yml, jobs.yml, scripts.yml - свое рода это тоже conventions.
+- Pipeline состоит из набора файлов, который храниться в [отдельной папке](./src/pipeline-sample/). Название папки отражает название pipeline.
+- pipeline.yml - файл содержит [pipeline definition](#pipeline-definition).
+- jobs.yml - файл содержит HIDDEN JOBs. см. [JOBs definition](#jobs-definition)
+  - имя hidden job д.б. в kebab-case и начинаться с prefix .job-*
+- scripts.yml - файл содержит скрипты автоматизации.
+  - все скрипты задаются как hidden job и имя д.б. в kebab-case и начинаться с prefix .script-*
 
 ## Conclusion ##
 
