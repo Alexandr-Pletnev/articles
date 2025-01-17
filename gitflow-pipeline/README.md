@@ -242,6 +242,7 @@ build:auto:
 
 Naming convention для текущих примеров:
 
+- имя key д.б. в kebab-case.
 - \*-auto или без -suffix - запуск JOB автоматически. по умолчанию*.
 - \*-manual  - запуск JOB вручную.
 - \*-skip - пропустить JOB (не выполнять).
@@ -259,7 +260,7 @@ Naming convention для текущих примеров:
 - если режим запуска по умолчанию д.б. **автоматический** укажите для  `REGEX_KEY_AUTO: /\|({build|build-auto)\|/i` и для `REGEX_KEY_MANUAL: /\|build-manual\|/i`
 - если режим запуска по умолчанию д.б. **ручной** укажите для  `REGEX_KEY_MANUAL: /\|(build|build-manual)\|/i` и для `REGEX_KEY_AUTO: /\|build-auto\|/i`.
 
-### Pipeline's files arrangement ###
+### Pipeline's artifacts arrangement ###
 
 - Pipeline состоит из набора файлов, который храниться в [отдельной папке](./src/pipeline-sample/). Название папки отражает название pipeline.
 - pipeline.yml - файл содержит [pipeline definition](#pipeline-definition) в том числе VISIBLE JOBs.
@@ -270,7 +271,7 @@ Naming convention для текущих примеров:
 
   ### Variables naming conventions ###
   
-  Все имена variables в pipeline yaml и bash scripts д.б. в SCREAM_CASE, пример: FEATURE_KEYS, REGEX_KEY_AUTO.
+  Все имена variables в pipeline yaml и bash scripts д.б. в SCREAM_CASE, пример: FEATURE_KEYS, REGEX_KEY_AUTO, MR_AUTHOR.
 
 ## Conclusion ##
 
