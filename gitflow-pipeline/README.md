@@ -178,10 +178,10 @@ build:auto:
 - JOB определяем как [HIDDEN JOBs (Start the job name with a dot (.))](https://docs.gitlab.com/ee/ci/jobs/#hide-jobs).
 - имена |KEY| произвольные и задаются по своему усмотрению, но желательно что бы соответствовали определенному [naming convention](#keys-naming-convention).
 - имена |KEY| обязательно должны экранироваться символом "|"  с обеих сторон. такой подход позволяет использовать даже комментарии в описание pipeline.
-  - "deploy-q|" or  "|deploy-q" or "deploy-q" - incorrect.
-  - "|deploy-q|" - correct.
-  - "|build|test|deploy-q|" - correct.
-  - " some description: |deploy-q-manual|restart-q-manual|"  - correct.
+  - "deploy-q|" or  "|deploy-q" or "deploy-q" - некорректно.
+  - "|deploy-q|" - корректно.
+  - "|build|test|deploy-q|" - корректно.
+  - " some description: |deploy-q-manual|restart-q-manual|"  - корректно.
 - regex указываем в двух переменных. по сути мы переопределяем  значения этих переменных заданных в  gitflow-pipeline-conditions.yml.
   - REGEX_KEY_AUTO - для автоматического запуска JOB.
   - REGEX_KEY_MANUAL - для запуска JOB руками.
@@ -189,7 +189,7 @@ build:auto:
 
 <ins>На втором шаге определяем два VISIBLE JOBs.</ins>  Задаем им имена, т.к. они будут видны в UI (e.g. build:manual или build:auto). И с помощью инструкции  ["extends:"](https://docs.gitlab.com/ee/ci/yaml/#extends )  указываем какие hidden job переиспользовать. в нашем случае это режим запуска .start-manual или .start-auto и какой JOB это .job-build.
 
-> Согласно todo:conventions HIDDEN JOBs определяются в файле  jobs.yml, a VISIBLE JOBs в файле pipeline.yml.
+> Согласно [текущих conventions](#pipelines-artifacts-arrangement) HIDDEN JOBs определяются в файле  jobs.yml, a VISIBLE JOBs в файле pipeline.yml.
 
 ## Pipeline definition ##
 
@@ -202,14 +202,14 @@ build:auto:
 3. Определить `stages:` для pipeline (см. <https://docs.gitlab.com/ee/ci/yaml/#stages>).
 4. Определить VISIBLE JOBs, по паре AUTO and MANUAL, указав им:
     1. имена, которые желаете видеть в UI.
-    2. к какой stage данный JOB относиться.
+    2. к какому stage данный JOB относиться.
     3. режим запуска `.start-auto` или `.start-manual`
-    4. какой `.job-hidden` использовать. (определение самих hidden jobs, где и как, на ваше усмотрение, можно в этом же файле, а можно и в отдельном).
-    5. другие параметры JOB по вашему усмотрению.
+    4. какой `.job-hidden` использовать.
+    5. другие параметры JOB по своему усмотрению.
 
 Примеры pipelines на базе Gitflow pipeline conditions:
 
-- [MR-Only](./src/mr-only/pipeline.yml) - пример pipeline только для Merge requests. В данном примере pipeline стартует только при создании Merge Request. (пример также содержит [bash script](./src/mr-only/scripts.yml) который выполняет ряд проверок: на корректное имя ветки и что автор комита не является рецензентом (reviewer)).
+- [MR-Only](./src/mr-only/pipeline.yml) - пример pipeline только для Merge requests. В данном примере pipeline стартует только при создании Merge Request. (пример также содержит [bash script](./src/mr-only/scripts.yml), который выполняет ряд проверок: на корректное имя ветки и что автор комита не является рецензентом (reviewer)).
 - [Multi-Envs](./src/pipeline-sample/pipeline.yml) - пример организации pipeline для Dev, QA, Prod сред. (а также примеры [bash scripts](./src/pipeline-sample/scripts.yml) с помощью которых выполняется 'Build docker images and deploy to docker-compose on remote host').
 
 Для наглядности представления pipeline можно использовать возможности multiline string языка YAML (смотрите примеры по ссылке: <https://stackoverflow.com/a/21699210>).
@@ -246,7 +246,7 @@ Naming convention для текущих примеров:
 - \*-auto или без -suffix - запуск JOB автоматически. по умолчанию*.
 - \*-manual  - запуск JOB вручную.
 - \*-skip - пропустить JOB (не выполнять).
-- \*-d-\* - действия на DEV environment, например deploy/restart/clean/so on.
+- \*-d-\* - действия на DEV environment, например deploy/restart/clean/и т.п.
 - \*-q-\* - действия на  QA (TEST) environment, например deploy.
 - \*-p-\* - действия на  PROD environment, например deploy.
 
@@ -262,7 +262,7 @@ Naming convention для текущих примеров:
 
 ### Pipeline's artifacts arrangement ###
 
-- Pipeline состоит из набора файлов, который храниться в [отдельной папке](./src/pipeline-sample/). Название папки отражает название pipeline.
+- Pipeline состоит из набора файлов, которые хранятся в [отдельной папке](./src/pipeline-sample/). Название папки отражает название pipeline.
 - pipeline.yml - файл содержит [pipeline definition](#pipeline-definition) в том числе VISIBLE JOBs.
 - jobs.yml - файл содержит HIDDEN JOBs. см. [JOBs definition](#jobs-definition).
   - имя hidden job д.б. в kebab-case и начинаться с prefix ".job-*"
@@ -275,9 +275,9 @@ Naming convention для текущих примеров:
 
 ## Conclusion ##
 
-В свое время передо мной стояла задача по реализации CI/CD pipeline. Изучив имеющиеся под рукой и в интернете реализации и почерпнув от туда удачные идеи я разработал описанный здесь подход.
+В свое время передо мной стояла задача по реализации CI/CD pipeline. Изучив имеющиеся под рукой и в интернете реализации и почерпнув от туда удачные идеи был разработал описанный здесь подход.
 
-Разуметься данный подход не покрывает всех возможных сценариев организации CI/CD pipeline и у меня самого еще вызывает некоторые вопросы. Возможно кто-то сочтет его переусложненным или наоборот не достаточным (не дает возможности реализовать определенный кейс) или сочтет сырым и по своему будет прав.
+Разуметься данный подход не покрывает всех возможных сценариев организации CI/CD pipeline и у меня самого есть некоторые вопросы, например как быть если условий куда больше чем заложено в Gitflow pipeline. Возможно кто-то сочтет его переусложненным или наоборот не достаточным (не дает возможности реализовать определенный кейс) или сочтет сырым и по своему будет прав.
 
 Написав данную статью я преследую две цели:
 
