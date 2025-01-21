@@ -269,7 +269,7 @@ Naming convention для текущих примеров:
 - scripts.yml - файл содержит скрипты автоматизации.
   - все скрипты задаются как hidden job и имя д.б. в kebab-case и начинаться с prefix ".script-*"
 
-  ### Variables naming conventions ###
+### Variables naming conventions ###
   
   Все имена variables в pipeline yaml и bash scripts д.б. в SCREAM_CASE, пример: FEATURE_KEYS, REGEX_KEY_AUTO, MR_AUTHOR.
 
