@@ -6,8 +6,8 @@
 
 - реализация под [Gitlab CI/CD pipeline](https://docs.gitlab.com/ee/ci/pipelines/).
 - процесс разработки проходит по правилам  [Gitflow workflow](./gitflow-worklow.md)
-- необходимость выполнения действий в несколько этапов и для нескольких сред: DEV, QA, STAGE, PROD.
-- возможность определения режима запуска JOBs: автоматически или в ручную.
+- необходимость выполнения действий в несколько этапов и для нескольких сред: DEV, QA or TEST, PROD.
+- возможность указания режима запуска JOBs в pipeline: автоматически или вручную.
 
 Описываемый далее CI/CD pipeline был специально спроектирован для Gitflow workflow поэтому был назван **Gitflow pipeline**.
 
@@ -33,9 +33,9 @@ variables:
 - |build|test|deploy-d-manual| - это последовательность |KEY-1|KEY-2|KEY-N|  где за каждым  |KEY-X| закрепляются JOBs, которые будут запущены автоматически или вручную при запуске pipeline,  в данном случае при PUSH в соответствующую ветку. (см. [Job definition](#jobs-definition)).
 - имена |KEY-1|KEY-2|KEY-N| заданы согласно naming convention. (см. [Keys naming convention](#keys-naming-convention)).
 
-## Пример ##
+## Example ##
 
-Разберем пример: ```FEATURE_KEYS: "|build|test|deploy-d-manual|"``` - при PUSH в ветку "feature/*", автоматически запуститься JOB закрепленный за key |build| и при успешном завершении job |build| далее автоматически запуститься job закрепленный за key |test|, далее при успешном завершении job |test|, активируется job закрепленный за key |deploy-d-manual|, но будет ожидать ручного запуска.
+Разберем пример: ```FEATURE_KEYS: "|build|test|deploy-d-manual|"``` - при PUSH в ветку "feature/*", автоматически запуститься pipeline и JOB закрепленный за key |build| и при успешном завершении job |build| далее автоматически запуститься job закрепленный за key |test|, далее при успешном завершении job |test|, активируется job закрепленный за key |deploy-d-manual|, но будет ожидать ручного запуска.
 
 JOBs  в общем виде задаются как (пример для |build|):
 
@@ -131,8 +131,8 @@ variables:
   - при этом, переменные CONDITIONs  должны быть переопределены в файле соответствующего pipeline с указанием  |KEY-1|KEY-2|KEY-N|.
 - .start-auto: and .start-manual: - объявлены как HIDDEN JOB и содержат только условия запуска pipeline, которые задаются с помощью инструкции [RULES](https://docs.gitlab.com/ee/ci/jobs/job_rules.html).
   - каждая из групп  .start-auto: or .start-manual: определяет несколько "- if:" для каждого CONDITION с указанием режима запуска [WHEN](https://docs.gitlab.com/ee/ci/yaml/#when).
-  - далее эти условия запуска применяются к конкретному JOB с помощью инструкции  ["extends:"](https://docs.gitlab.com/ee/ci/yaml/#extends )
-- Каждый IF определяет expression который можно трактовать как "если запушили коммит в ветку {BRANCH-NAME} и переменная ${BRANCH-NAME}_KEYS соответствует regex (содержит |KEY|), то вернуть true ", при этом regex задается через переменные уровня JOB $REGEX_KEY_MANUAL и $REGEX_KEY_AUTO .
+  - в последствии эти условия запуска применяются к конкретному JOB с помощью инструкции  ["extends:"](https://docs.gitlab.com/ee/ci/yaml/#extends )
+- Каждый IF определяет expression который можно трактовать как "если запушили коммит в ветку {BRANCH-NAME} и переменная ${BRANCH-NAME}_KEYS соответствует regex (содержит |KEY|), то вернуть true ", при этом regex задается через переменные уровня JOB: $REGEX_KEY_MANUAL и $REGEX_KEY_AUTO .
 - в свою очередь переменные $REGEX_KEY_MANUAL и $REGEX_KEY_AUTO должны быть переопределены в конкретном JOB и содержать regex который и определяет за каким |KEY| данный JOB закрепляется.  (подробнее см. [JOBs definition](#jobs-definition)).
 
 > Необходимо понимать что файл gitflow-pipeline-conditions.yml является общим для всех других Gitflow pipeline и определяет только какие CONDITIONS есть и условия их запуска, а не сам pipeline. Сам pipeline декларируется в отдельном файле и должен переопределить все переменные СONDITIONS.  подробнее смотрите в [pipeline definition](#pipeline-definition).
@@ -141,7 +141,7 @@ variables:
 
 JOBs  в общем виде задаются как (пример для |build|):
 
-1. Определяем HIDDEN JOB  и закрепляем JOB за KEYs: |build| или |build-auto| или |build-manual|
+1. Определяем HIDDEN JOB  и закрепляем JOB за KEYs: |build| или |build-auto| или |build-manual|, а также указываем [stage](https://docs.gitlab.com/ee/ci/yaml/#stage)*.
 
 ```yaml
 .job-build:
@@ -152,6 +152,8 @@ JOBs  в общем виде задаются как (пример для |build
     REGEX_KEY_AUTO: /\|(build|build-auto)\|/i
     REGEX_KEY_MANUAL: /\|build-manual\|/i
 ```
+
+> *stage - в самом pipeline с помощью [stages:](https://docs.gitlab.com/ee/ci/yaml/#stages) задается последовательность выполнения JOB в рамках pipeline в определенном порядке.
 
 2. Далее определяем два VISIBLE JOBs для ручного и автоматического запуска как:
 
@@ -173,49 +175,42 @@ build:auto:
 
 Некоторые ключевые моменты:
 
-- JOB определяем как [hidden(Start the job name with a dot (.))](https://docs.gitlab.com/ee/ci/jobs/#hide-jobs).
-- имена |KEY| произвольные и задаются по своему усмотрению, но желательно что бы соответствовали определенному naming convention.
+- JOB определяем как [HIDDEN JOBs (Start the job name with a dot (.))](https://docs.gitlab.com/ee/ci/jobs/#hide-jobs).
+- имена |KEY| произвольные и задаются по своему усмотрению, но желательно что бы соответствовали определенному [naming convention](#keys-naming-convention).
 - имена |KEY| обязательно должны экранироваться символом "|"  с обеих сторон. такой подход позволяет использовать даже комментарии в описание pipeline.
-  - "deploy-q|" or  "|deploy-q" or "deploy-q" - incorrect.
-  - "|deploy-q|" - correct.
-  - "|build|test|deploy-q|" - correct.
-  - " some description: |deploy-q-manual|restart-q-manual|"  - correct.
+  - "deploy-q|" or  "|deploy-q" or "deploy-q" - некорректно.
+  - "|deploy-q|" - корректно.
+  - "|build|test|deploy-q|" - корректно.
+  - " some description: |deploy-q-manual|restart-q-manual|"  - корректно.
 - regex указываем в двух переменных. по сути мы переопределяем  значения этих переменных заданных в  gitflow-pipeline-conditions.yml.
   - REGEX_KEY_AUTO - для автоматического запуска JOB.
   - REGEX_KEY_MANUAL - для запуска JOB руками.
-- за одним |KEY| можно закрепить несколько JOB. они будут стартовать ||.
+- за одним |KEY| можно закрепить несколько JOB. они будут стартовать параллельно.
 
-<ins>На втором шаге определяем два VISIBLE JOBs.</ins>  Задаем им имена, т.к. они будут видны в UI (e.g. build:manual или build:auto). И с помощью инструкции  ["extends:"](https://docs.gitlab.com/ee/ci/yaml/#extends )  указываем какие hidden job переиспользовать. в нашем случае это режим запуска  .start-manual или .start-auto и какой JOB это .job-build.
+<ins>На втором шаге определяем два VISIBLE JOBs.</ins>  Задаем им имена, т.к. они будут видны в UI (e.g. build:manual или build:auto). И с помощью инструкции  ["extends:"](https://docs.gitlab.com/ee/ci/yaml/#extends )  указываем какие hidden job переиспользовать. в нашем случае это режим запуска .start-manual или .start-auto и какой JOB это .job-build.
 
-## Keys naming convention ##
-
-Naming convention для текущих примеров:
-
-- \*-auto or w/o suffix - launch JOB automatically. by default.
-- \*-manual  - launch JOB manually.
-- \*-skip - skip JOB.
-- \*-d-\* - to deploy on DEV environment.
-- \*-q-\* - to deploy on QA environment.
-- \*-s-\* - to deploy on STAGE environment.
-- \*-p-\* - to deploy on PROD environment.
-
-Вы можете согласовать свой naming convention и придерживаться его, например условиться что
-
-- \*-manual or w/o suffix  - launch JOB manually. by default.
-- \*-auto - launch JOB automatically.
-
- т.е. по умолчанию ручной запуск  e.g. |build| == |build-manual|, а для автоматического запуска надо всегда указывать postfix "-auto".
+> Согласно [текущих conventions](#pipelines-artifacts-arrangement) HIDDEN JOBs определяются в файле  jobs.yml, a VISIBLE JOBs в файле pipeline.yml.
 
 ## Pipeline definition ##
 
-Файл [gitflow-pipeline-conditions.yml](src/common/gitflow-pipeline-conditions.yml) является общим для всех других Gitflow pipeline и определяет только какие CONDITIONS есть и условия их запуска, а не сам pipeline. Сам pipeline декларируется в отдельном файле и должен переопределить все переменные СONDITIONS (подробнее смотрите [Conditions definition](#conditions-definition)).  
+Файл [gitflow-pipeline-conditions.yml](src/common/gitflow-pipeline-conditions.yml) является общим для всех других Gitflow pipeline и определяет только какие CONDITIONS есть и условия их запуска, а не сам pipeline. Сам pipeline декларируется в отдельном файле (и папке)  и должен переопределить все переменные CONDITIONS (подробнее смотрите [Conditions definition](#conditions-definition)).  
+
+В самом pipeline необходимо указать, как минимум, следующие настройки:
+
+1. Подключить [gitflow-pipeline-conditions.yml](src/common/gitflow-pipeline-conditions.yml) как `include: {path-to-folder}/gitflow-pipeline-conditions.yml` (где файл gitflow-pipeline-conditions.yml будет находиться вам решать).
+2. Собственно описать/задать сам pipeline, а конкретно  переопределить все переменные CONDITIONS, и указать нужную последовательность |KEY-1|KEY-2|KEY-N| для каждого CONDITION.
+3. Определить `stages:` для pipeline (см. <https://docs.gitlab.com/ee/ci/yaml/#stages>).
+4. Определить VISIBLE JOBs, по паре AUTO and MANUAL, указав им:
+    1. имена, которые желаете видеть в UI.
+    2. к какому stage данный JOB относиться.
+    3. режим запуска `.start-auto` или `.start-manual`
+    4. какой `.job-hidden` использовать.
+    5. другие параметры JOB по своему усмотрению.
 
 Примеры pipelines на базе Gitflow pipeline conditions:
 
-- [MR-Only](./src/mr-only/pipeline.yml) - pipeline только для Merge requests. Выполняет проверки: на корректное имя ветки и что автор комита не имеет права мержить.
-- [Multi-Stage](./src/pipeline-sample/pipeline.yml) - пример организации pipeline для Dev, QA, Prod сред. Build docker images and deploy to docker-compose on remote host.
-
-> Обратите внимание на организацию артефактов pipeline по файлам: pipeline.yml, jobs.yml, scripts.yml - свое рода это тоже conventions.
+- [MR-Only](./src/mr-only/pipeline.yml) - пример pipeline только для Merge requests. В данном примере pipeline стартует только при создании Merge Request. (пример также содержит [bash script](./src/mr-only/scripts.yml), который выполняет ряд проверок: на корректное имя ветки и что автор комита не является рецензентом (reviewer)).
+- [Multi-Envs](./src/pipeline-sample/pipeline.yml) - пример организации pipeline для Dev, QA, Prod сред. (а также примеры [bash scripts](./src/pipeline-sample/scripts.yml) с помощью которых выполняется 'Build docker images and deploy to docker-compose on remote host').
 
 Для наглядности представления pipeline можно использовать возможности multiline string языка YAML (смотрите примеры по ссылке: <https://stackoverflow.com/a/21699210>).
 
@@ -235,10 +230,58 @@ Naming convention для текущих примеров:
   HOTFIX_KEYS: $RELEASE_KEYS
   ```
 
-  Главное придерживаться правила: *имена |KEY| обязательно должны экранироваться символом "|" с обеих сторон*
+  Главное придерживаться правила: *имена |KEY| обязательно должны экранироваться символом "|" с обеих сторон*.
+  
+## Pipeline`s conventions ##
+
+Чтобы код pipeline был читаемым и понятным другим специалистам, будет полезным  выработать некие соглашения и придерживаться их при разработке и чтении кода pipeline.
+
+В данном разделе собраны соглашения которые были выработаны в процессе эксплуатации Gitflow pipeline.
+
+### Keys naming convention ###
+
+Naming convention для текущих примеров:
+
+- имя key д.б. в kebab-case.
+- \*-auto или без -suffix - запуск JOB автоматически. по умолчанию*.
+- \*-manual  - запуск JOB вручную.
+- \*-skip - пропустить JOB (не выполнять).
+- \*-d-\* - действия на DEV environment, например deploy/restart/clean/и т.п.
+- \*-q-\* - действия на  QA (TEST) environment, например deploy.
+- \*-p-\* - действия на  PROD environment, например deploy.
+
+Вы можете согласовать свой naming convention и придерживаться его, например условиться что
+
+- \*-manual или без -suffix  - запуск JOB вручную. по умолчанию*.
+- \*-auto - запуск JOB автоматически. т.е. для автоматического запуска JOB надо явно указывать suffix "-auto".
+
+ *по умолчанию - режим запуска по умолчанию, т.е. какой режим назначить для |KEY| без suffix, например для KEY |build|:
+
+- если режим запуска по умолчанию д.б. **автоматический** укажите для  `REGEX_KEY_AUTO: /\|({build|build-auto)\|/i` и для `REGEX_KEY_MANUAL: /\|build-manual\|/i`
+- если режим запуска по умолчанию д.б. **ручной** укажите для  `REGEX_KEY_MANUAL: /\|(build|build-manual)\|/i` и для `REGEX_KEY_AUTO: /\|build-auto\|/i`.
+
+### Pipeline's artifacts arrangement ###
+
+- Pipeline состоит из набора файлов, которые хранятся в [отдельной папке](./src/pipeline-sample/). Название папки отражает название pipeline.
+- pipeline.yml - файл содержит [pipeline definition](#pipeline-definition) в том числе VISIBLE JOBs.
+- jobs.yml - файл содержит HIDDEN JOBs. см. [JOBs definition](#jobs-definition).
+  - имя hidden job д.б. в kebab-case и начинаться с prefix ".job-*"
+- scripts.yml - файл содержит скрипты автоматизации.
+  - все скрипты задаются как hidden job и имя д.б. в kebab-case и начинаться с prefix ".script-*"
+
+### Variables naming conventions ###
+  
+  Все имена variables в pipeline yaml и bash scripts д.б. в SCREAM_CASE, пример: FEATURE_KEYS, REGEX_KEY_AUTO, MR_AUTHOR.
 
 ## Conclusion ##
 
-В свое время передо мной стояла задача по реализации CI/CD pipeline. Изучив имеющиеся под рукой и в интернете реализации и почерпнув от туда удачные идеи я разработал описанный здесь подход.
+В свое время передо мной стояла задача по реализации CI/CD pipeline. Изучив имеющиеся под рукой и в интернете реализации и почерпнув от туда удачные идеи был разработал описанный здесь подход.
+
+Разуметься данный подход не покрывает всех возможных сценариев организации CI/CD pipeline и у меня самого есть некоторые вопросы, например как быть если условий куда больше чем заложено в Gitflow pipeline. Возможно кто-то сочтет его переусложненным или наоборот не достаточным (не дает возможности реализовать определенный кейс) или сочтет сырым и по своему будет прав.
+
+Написав данную статью я преследую две цели:
+
+1. Задокументировать данный подход для себя будущего.
+2. Поделиться идеями заложенными в Gitflow pipeline с широким кругом лиц - возможно кому-то пригодиться и натолкнет их на свои идеи.
 
 Надеюсь что описанный здесь Gitflow pipeline окажется полезным и станет ценным источником вдохновения для других.
